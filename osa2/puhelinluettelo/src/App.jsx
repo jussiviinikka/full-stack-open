@@ -57,17 +57,20 @@ const App = () => {
 	const [filter, setFilter] = useState('')	
 	const [shownPersons, setShownPersons] = useState(persons)
 
+	const baseUrl = 'http://localhost:3001/persons'
+	
 	useEffect(() => {
-		console.log('effect')
 		axios
-			.get('http://localhost:3001/persons')
+			.get(baseUrl)
 			.then(response => {
-				console.log('promise fulfilled')
 				setPersons(response.data)
 				setShownPersons(response.data)
 			})
 	}, [])
-	console.log('render', persons.length, 'persons')
+
+	const post = (person) => axios
+		  .post(baseUrl, person)
+		  .then(response => {console.log(response)})
 	
 	const addNumber = (event) => {
 		event.preventDefault()
@@ -82,6 +85,7 @@ const App = () => {
 			setPersons(new_persons)
 			setShownPersons(new_persons.filter(person =>
 				person.name.toLowerCase().includes(filter)))
+			post(newPerson)
 		}
 		setNewName('')
 		setNewNumber('')
