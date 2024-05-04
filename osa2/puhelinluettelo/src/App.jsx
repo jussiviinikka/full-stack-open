@@ -1,16 +1,53 @@
 import { useState } from 'react'
 
-const Numbers = ({persons}) => {
+const Person = ({name, number}) => {
+	return(
+		<li key={name}>
+			{name} {number}
+		</li>
+	)	
+}
+
+const Persons = ({persons}) => {
 	return (
 		<ul>
-		{persons.map(person =>
-			<li key={person.name}>
-				{person.name} {person.number}
-			</li>
-		)}
+			{persons.map(person => <Person key={person.name} name={person.name} number={person.number}/>)}
 		</ul>
 	)
-} 
+}
+
+const Filter = ({filter, onChange}) => {
+	return (
+			<div>
+				filter shown with: 
+				<input value={filter} onChange={onChange}/>
+			</div>
+	)
+}
+
+const PersonForm = (props) => {
+	return (
+		<form onSubmit={props.addNumber}>
+			<div>
+				name:
+				<input
+					value={props.newName}
+					onChange={props.handleNameChange}
+				/>
+			</div>
+			<div>
+				number:
+				<input
+					value={props.newNumber}
+					onChange={props.handleNumberChange}
+				/>
+			</div>				
+			<div>
+				<button type="submit">add</button>
+			</div>
+		</form>
+	)
+}
 
 const App = () => {
 	const [persons, setPersons] = useState([
@@ -21,6 +58,7 @@ const App = () => {
 	]) 
 	const [newName, setNewName] = useState('')
 	const [newNumber, setNewNumber] = useState('')
+	const [filter, setFilter] = useState('')	
 	const [shownPersons, setShownPersons] = useState(persons)
 
 	const addNumber = (event) => {
@@ -32,7 +70,10 @@ const App = () => {
 		if (persons.some(p => p.name == newPerson.name))
 		{alert(`${newName} is already added to phonebook`)}
 		else {
-			setPersons(persons.concat(newPerson))
+			const new_persons = persons.concat(newPerson)
+			setPersons(new_persons)
+			setShownPersons(new_persons.filter(person =>
+				person.name.toLowerCase().includes(filter)))
 		}
 		setNewName('')
 		setNewNumber('')
@@ -45,40 +86,22 @@ const App = () => {
 		setNewNumber(event.target.value)
 	}
 	const handleFilterChange = (event) => {
+		const new_filter = event.target.value.toLowerCase()
+		setFilter(new_filter)
 		setShownPersons(persons.filter(person =>
-			person.name.toLowerCase().includes(event.target.value.toLowerCase())))
+			person.name.toLowerCase().includes(new_filter)))
 	}
 
 	return (
 		<div>
 			<h1>Phonebook</h1>
-			<div>
-				filter shown with: 
-				<input onChange={handleFilterChange}/>
-			</div>
+			<Filter value={filter} onChange={handleFilterChange}/>
+			
 			<h2>Add new</h2>
-			<form onSubmit={addNumber}>
-				<div>
-					name:
-					<input
-						value={newName}
-						onChange={handleNameChange}
-					/>
-				</div>
-				<div>
-					number:
-					<input
-						value={newNumber}
-						onChange={handleNumberChange}
-					/>
-				</div>				
-				<div>
-					<button type="submit">add</button>
-				</div>
-			</form>
+			<PersonForm {...{newName, handleNameChange, newNumber, handleNumberChange, addNumber}}/>
+			
 			<h2>Numbers</h2>
-
-			<Numbers persons={shownPersons}/>
+			<Persons persons={shownPersons}/>
 		</div>
 	)
 
