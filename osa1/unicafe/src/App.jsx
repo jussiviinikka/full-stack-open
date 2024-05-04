@@ -14,15 +14,23 @@ const Statistics = ({good, neutral, bad}) => {
 		(good - bad) / all()
 	)
 
+	if (all() > 0) {
+		return (
+			<div>
+				<h1>Statistics</h1>
+				good: {good}<br/>
+				neutral: {neutral}<br/>
+				bad: {bad}<br/><br/>
+				all: {all()}<br/>
+				average: {average()}<br/>
+				positive: {positive_perc()}<br/>
+			</div>
+		)
+	}
 	return (
 		<div>
 			<h1>Statistics</h1>
-			good: {good}<br/>
-			neutral: {neutral}<br/>
-			bad: {bad}<br/><br/>
-			all: {all()}<br/>
-			average: {average()}<br/>
-			positive: {positive_perc()}<br/>
+			No feedback given.
 		</div>
 	)
 }
