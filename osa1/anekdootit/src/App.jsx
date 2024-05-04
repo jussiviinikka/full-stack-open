@@ -27,13 +27,16 @@ const App = () => {
 	}
 	
   return (
-    <div>
-		{anecdotes[selected]}<br/>
-	    has {points[selected]} votes<br/>
-		<Button text="vote" onClick={vote}/>
-		<Button text="next anecdote" onClick={() => random(anecdotes.length)}/>
-		{console.log(points)}
-    </div>
+      <div>
+		  <h1>Anecdote of the day</h1>
+		  {anecdotes[selected]}<br/>
+	      has {points[selected]} votes<br/>
+		  <Button text="vote" onClick={vote}/>
+		  <Button text="next anecdote" onClick={() => random(anecdotes.length)}/>
+		
+		  <h1>Anecdote with most votes</h1>
+		  {anecdotes[points.indexOf(Math.max(...points))]}
+      </div>
   )
 }
 
