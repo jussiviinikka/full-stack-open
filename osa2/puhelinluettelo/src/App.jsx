@@ -61,12 +61,39 @@ const PersonForm = (props) => {
 	)
 }
 
+const Notification = ({message, error}) => {
+
+	const errorStyle = {
+		color: 'red'
+	}
+	const notStyle = {
+		color: 'green'
+	}
+	
+	if (message === null) {
+		return null
+	}
+	if (error) {
+ 		return (
+			<div style={errorStyle}>
+				{message}
+			</div>
+		)
+	}
+ 	return (
+		<div style={notStyle}>
+			{message}
+		</div>
+	)	
+}
+
 const App = () => {
 	const [persons, setPersons] = useState([])
 	const [newName, setNewName] = useState('')
 	const [newNumber, setNewNumber] = useState('')
 	const [filter, setFilter] = useState('')	
 	const [shownPersons, setShownPersons] = useState(persons)
+	const [notification, setNotification] = useState('')
 
  	useEffect(() => {
 		personService
@@ -85,15 +112,20 @@ const App = () => {
 		}
 		if (persons.some(p => p.name == newPerson.name))
 		{
-			if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
+			if (window.confirm(`${newName} is already added to phonebook,`
+							   + 'replace the old number with a new one?')) {
  				const key = persons.filter(p => p.name === newName)[0].id
 				newPerson.id = key
 				personService.update(newPerson).then(
 					response => {
-						const updated_persons = persons.map(p => p.id != key? p : newPerson)
-						setPersons(updated_persons)
-						setShownPersons(updated_persons.filter(person =>
-							person.name.toLowerCase().includes(filter)))
+						if (response.status === 200) {
+							const updated_persons = persons.map(p => p.id != key? p : newPerson)
+							setPersons(updated_persons)
+							setShownPersons(updated_persons.filter(person =>
+								person.name.toLowerCase().includes(filter)))
+							setNotification(`Updated ${newName}`, false)
+							setTimeout(() => {setNotification(null, false)}, 2000)
+						}
 					}
 				)
 			}
@@ -101,11 +133,15 @@ const App = () => {
 		else {			
 			personService.create(newPerson)
 				.then(response => {
-					const newPerson = response.data
-					const new_persons = persons.concat(newPerson)
-					setPersons(new_persons)
-					setShownPersons(new_persons.filter(person =>
-						person.name.toLowerCase().includes(filter)))
+					if (response.status === 201) {
+						const newPerson = response.data
+						const new_persons = persons.concat(newPerson)
+						setPersons(new_persons)
+						setShownPersons(new_persons.filter(person =>
+							person.name.toLowerCase().includes(filter)))
+						setNotification(`Added ${newName}`, false)
+						setTimeout(() => {setNotification(null, false)}, 2000)
+					}
 				})
 		}
 		setNewName('')
@@ -114,9 +150,14 @@ const App = () => {
 
 	const removePerson = (name, key) => {
 		if (window.confirm(`Delete ${name}?`)) {
-			personService.remove(key)
-			setPersons(persons.filter(p => p.id != key))		
-			setShownPersons(shownPersons.filter(p => p.id != key))
+			personService.remove(key).then(response => {
+				if (response.status === 200) {
+					setPersons(persons.filter(p => p.id != key))		
+					setShownPersons(shownPersons.filter(p => p.id != key))
+					setNotification(`Removed ${name}`, false)
+					setTimeout(() => {setNotification(null, false)}, 2000)
+				}
+			})
 		}
 	}
 
@@ -136,6 +177,7 @@ const App = () => {
 	return (
 		<div>
 			<h1>Phonebook</h1>
+			<Notification message={notification} />
 			<Filter value={filter} onChange={handleFilterChange}/>
 			
 			<h2>Add new</h2>
