@@ -146,7 +146,7 @@ const App = () => {
   const removePerson = (name, key) => {
     if (window.confirm(`Delete ${name}?`)) {
       personService.remove(key).then((response) => {
-        if (response.status === 200) {
+        if (response.status === 204) {
           setPersons(persons.filter((p) => p.id != key));
           setShownPersons(shownPersons.filter((p) => p.id != key));
           setNotification(`Removed ${name}`, false);
