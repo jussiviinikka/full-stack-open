@@ -2,4 +2,5 @@
 
 Exercises for https://fullstackopen.com/.
 
+Phonebook app running at [[https://fso-phonebook-2024.fly.dev/][fso-phonebook-2024.fly.dev]].
 
