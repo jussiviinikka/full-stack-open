@@ -99,12 +99,21 @@ app.post("/api/persons/", (request, response) => {
   if (!(("name" in person) & ("number" in person))) {
     return response.status(400).send({ error: "name or number missing" });
   }
-  if (persons.find((p) => p.name === person.name)) {
-    return response.status(400).send({ error: "name already exists" });
-  }
-  person.id = id;
-  persons = persons.concat(person);
-  return response.status(201).send(person);
+  // if (persons.find((p) => p.name === person.name)) {
+  //   return response.status(400).send({ error: "name already exists" });
+  // }
+  // person.id = id;
+  // persons = persons.concat(person);
+  // return response.status(201).send(person);
+
+  const personDB = new Person({
+    name: person.name,
+    number: person.number,
+  });
+
+  personDB.save().then((savedPerson) => {
+    return response.status(201).json(savedPerson);
+  });
 });
 
 const PORT = process.env.PORT;
