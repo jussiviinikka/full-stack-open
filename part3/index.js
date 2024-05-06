@@ -56,9 +56,11 @@ app.get("/api/persons", (request, response, next) => {
 });
 
 app.get("/info", (request, response) => {
-  response.send(
-    `<p>Phonebook has info for ${persons.length} people</p></br>${new Date().toLocaleString()}`,
-  );
+  Person.find({}).then((persons) => {
+    response.send(
+      `<p>Phonebook has info for ${persons.length} people</p></br>${new Date().toLocaleString()}`,
+    );
+  });
 });
 
 app.get("/api/persons/:id", (request, response, next) => {
