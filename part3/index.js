@@ -33,7 +33,6 @@ app.use(
 );
 
 const errorHandler = (error, request, response, next) => {
-  console.error(error.message);
   if (error.name === "CastError") {
     return response.status(400).send({ error: "malformatted id" });
   }
@@ -49,7 +48,6 @@ app.get("/", (request, response) => {
 });
 
 app.get("/api/persons", (request, response, next) => {
-  // response.json(persons);
   Person.find({})
     .then((persons) => {
       response.json(persons);
@@ -97,6 +95,15 @@ app.post("/api/persons/", (request, response) => {
   personDB.save().then((savedPerson) => {
     return response.status(201).json(savedPerson);
   });
+});
+
+app.put("/api/persons/:id", (request, response, next) => {
+  const person = { ...request.body };
+  Person.findByIdAndUpdate(request.params.id, person, { new: true })
+    .then((updatedPerson) => {
+      return response.json(updatedPerson);
+    })
+    .catch((error) => next(error));
 });
 
 app.use(unknownEndpoint);
