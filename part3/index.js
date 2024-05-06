@@ -32,6 +32,18 @@ app.use(
   }),
 );
 
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message);
+  if (error.name === "CastError") {
+    return response.status(400).send({ error: "malformatted id" });
+  }
+  next(error);
+};
+
+const unknownEndpoint = (request, response) => {
+  response.status(404).send({ error: "unknown endpoint" });
+};
+
 // let persons = [
 //   {
 //     name: "Arto Hellas",
@@ -59,11 +71,13 @@ app.get("/", (request, response) => {
   response.send("<h1>Hello World!</h1>");
 });
 
-app.get("/api/persons", (request, response) => {
+app.get("/api/persons", (request, response, next) => {
   // response.json(persons);
-  Person.find({}).then((persons) => {
-    response.json(persons);
-  });
+  Person.find({})
+    .then((persons) => {
+      response.json(persons);
+    })
+    .catch((error) => next(error));
 });
 
 app.get("/info", (request, response) => {
@@ -72,20 +86,31 @@ app.get("/info", (request, response) => {
   );
 });
 
-app.get("/api/persons/:id", (request, response) => {
-  const id = Number(request.params.id);
-  const note = persons.find((note) => note.id === id);
-  if (note) {
-    response.json(note);
-  } else {
-    response.status(404).end();
-  }
+app.get("/api/persons/:id", (request, response, next) => {
+  Person.findById(request.params.id)
+    .then((person) => {
+      if (person) {
+        response.json(person);
+      } else {
+        response.status(404).end();
+      }
+    })
+    .catch((error) => next(error));
+  // const id = Number(request.params.id);
+  // const note = persons.find((note) => note.id === id);
+  // if (note) {
+  //   response.json(note);
+  // } else {
+  //   response.status(404).end();
+  // }
 });
 
-app.delete("/api/persons/:id", (request, response) => {
-  Person.findByIdAndDelete(request.params.id).then((result) => {
-    return response.status(204).end();
-  });
+app.delete("/api/persons/:id", (request, response, next) => {
+  Person.findByIdAndDelete(request.params.id)
+    .then((result) => {
+      return response.status(204).end();
+    })
+    .catch((error) => next(error));
   // const id = Number(request.params.id);
   // const person = persons.find((p) => p.id === id);
   // if (person) {
@@ -117,6 +142,9 @@ app.post("/api/persons/", (request, response) => {
     return response.status(201).json(savedPerson);
   });
 });
+
+app.use(unknownEndpoint);
+app.use(errorHandler);
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
