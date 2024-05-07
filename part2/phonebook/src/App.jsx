@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import personService from "./services/persons";
 
@@ -56,21 +55,15 @@ const PersonForm = (props) => {
   );
 };
 
-const Notification = ({ message, error }) => {
-  const errorStyle = {
-    color: "red",
+const Notification = ({ message }) => {
+  const styles = {
+    normal: { color: "green" },
+    error: { color: "red" },
   };
-  const notStyle = {
-    color: "green",
-  };
-
   if (message === null) {
     return null;
   }
-  if (error) {
-    return <div style={errorStyle}>{message}</div>;
-  }
-  return <div style={notStyle}>{message}</div>;
+  return <div style={styles[message.type]}>{message.content}</div>;
 };
 
 const App = () => {
@@ -79,7 +72,7 @@ const App = () => {
   const [newNumber, setNewNumber] = useState("");
   const [filter, setFilter] = useState("");
   const [shownPersons, setShownPersons] = useState(persons);
-  const [notification, setNotification] = useState("");
+  const [notification, setNotification] = useState(null);
 
   useEffect(() => {
     personService.getAll().then((response) => {
@@ -114,30 +107,47 @@ const App = () => {
                 person.name.toLowerCase().includes(filter),
               ),
             );
-            setNotification(`Updated ${newName}`, false);
+            setNotification({
+              content: `Updated ${newName}`,
+              type: "normal",
+            });
             setTimeout(() => {
-              setNotification(null, false);
+              setNotification(null);
             }, 2000);
           }
         });
       }
     } else {
-      personService.create(newPerson).then((response) => {
-        if (response.status === 201) {
-          const newPerson = response.data;
-          const new_persons = persons.concat(newPerson);
-          setPersons(new_persons);
-          setShownPersons(
-            new_persons.filter((person) =>
-              person.name.toLowerCase().includes(filter),
-            ),
-          );
-          setNotification(`Added ${newName}`, false);
+      personService
+        .create(newPerson)
+        .then((response) => {
+          if (response.status === 201) {
+            const newPerson = response.data;
+            const new_persons = persons.concat(newPerson);
+            setPersons(new_persons);
+            setShownPersons(
+              new_persons.filter((person) =>
+                person.name.toLowerCase().includes(filter),
+              ),
+            );
+            setNotification({
+              content: `Added ${newName}`,
+              type: "normal",
+            });
+            setTimeout(() => {
+              setNotification(null);
+            }, 2000);
+          }
+        })
+        .catch((error) => {
+          setNotification({
+            content: error.response.data.error,
+            type: "error",
+          });
           setTimeout(() => {
-            setNotification(null, false);
+            setNotification(null);
           }, 2000);
-        }
-      });
+        });
     }
     setNewName("");
     setNewNumber("");
@@ -149,9 +159,12 @@ const App = () => {
         if (response.status === 204) {
           setPersons(persons.filter((p) => p.id != key));
           setShownPersons(shownPersons.filter((p) => p.id != key));
-          setNotification(`Removed ${name}`, false);
+          setNotification({
+            content: `Removed ${name}`,
+            type: "normal",
+          });
           setTimeout(() => {
-            setNotification(null, false);
+            setNotification(null);
           }, 2000);
         }
       });

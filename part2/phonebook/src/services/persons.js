@@ -7,7 +7,9 @@ const getAll = () => {
 };
 
 const create = (newPerson) => {
-  return axios.post(baseUrl, newPerson);
+  return axios.post(baseUrl, newPerson).catch((error) => {
+    throw error;
+  });
 };
 
 const update = (updatedPerson) => {

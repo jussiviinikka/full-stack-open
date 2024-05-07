@@ -33,8 +33,12 @@ app.use(
 );
 
 const errorHandler = (error, request, response, next) => {
+  console.log(error.name);
   if (error.name === "CastError") {
     return response.status(400).send({ error: "malformatted id" });
+  }
+  if (error.name === "ValidationError") {
+    return response.status(400).send({ error: error.message });
   }
   next(error);
 };
@@ -83,7 +87,7 @@ app.delete("/api/persons/:id", (request, response, next) => {
     .catch((error) => next(error));
 });
 
-app.post("/api/persons/", (request, response) => {
+app.post("/api/persons/", (request, response, next) => {
   const person = { ...request.body };
   if (!(("name" in person) & ("number" in person))) {
     return response.status(400).send({ error: "name or number missing" });
@@ -94,9 +98,12 @@ app.post("/api/persons/", (request, response) => {
     number: person.number,
   });
 
-  personDB.save().then((savedPerson) => {
-    return response.status(201).json(savedPerson);
-  });
+  personDB
+    .save()
+    .then((savedPerson) => {
+      return response.status(201).json(savedPerson);
+    })
+    .catch((error) => next(error));
 });
 
 app.put("/api/persons/:id", (request, response, next) => {
