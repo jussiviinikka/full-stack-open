@@ -146,7 +146,7 @@ const App = () => {
           });
           setTimeout(() => {
             setNotification(null);
-          }, 2000);
+          }, 5000);
         });
     }
     setNewName("");
